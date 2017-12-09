@@ -1,4 +1,4 @@
-#Brent Turner - CSC 400 independent project - osciliscope
+#Brent Turner - CSC 400 independent project - Arduino Oscilloscope
 import sys
 import glob
 import serial
