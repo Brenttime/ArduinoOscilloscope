@@ -3,12 +3,9 @@ import sys
 import glob
 import serial
 import io
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib import style
 import time
 import numpy as np
-
+import pyqtgraph as pg
 
 #Gets all availabe serial Ports
 def serial_ports():
@@ -49,8 +46,8 @@ if(len(portList) > 1):
     print("Please type the port you desire")
     for port in portList:
         print(port)
-    selectedPort = raw_input()
-    
+    selectedPort = input()
+
 #If Only one Option - default for the user
 elif(len(portList) == 1):
     selectedPort = portList[0]
@@ -67,54 +64,50 @@ Do to the wonderful fact that serial.readline() was made to eliminate the '\r' o
 I would be able to still implement it, and that is because it is required to read my serial port with EOL parameters; therefore, this
 line came into play.
     </Note>
-''' 
-sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser)) 
+'''
+sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GET THE GRAPH SETUP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#https://matplotlib.org/devdocs/gallery/animation/strip_chart_demo.html
+try:
+    plt = pg.plot()
+    bufferSize = 1000
+    data = np.zeros(bufferSize)
+    curve = plt.plot()
+    line = plt.addLine(x=0)
+    plt.setRange(xRange=[0, bufferSize], yRange=[-15, 15])
+    i = 0
+except:
+    print("Graph Config Error")
 
-style.use('fivethirtyeight')
+def update():
+    global data, curve, line, i
 
-fig = plt.figure()
-ax1 = fig.add_subplot(1,1,1)
-
-
-def animate(i):
-    xs = []
-    ys = []
-    
     whiteSpace = sio.readline() #capture the whitespace
-    data = sio.readline()
+    readData = sio.readline()
 
     #Check for all the white space
     while(whiteSpace == data):
-        data = sio.readline() #Print to the Regular console the readings
-        
-    for i in range (0, 250):
-        try:
-            data = sio.readline()
-            attempt = float(data)
-            xs.append(i)
-            ys.append(attempt)
-            
-        #Failed to create float
-        except:
-            print("Failed to create float: " + data)
-        
-    ax1.clear()
-    ax1.plot(xs, ys)
+        readData = sio.readline() #Print to the Regular console the readings
+        print(ReadData)
 
+    n = 1  # update 10 samples per iteration
+
+    try:
+        reading = float(sio.readline()) * 3.28 #The value my voltage divider works at (6.8k and 3.3k ohlm resisters)
+        data[i:i+n] = reading
+        curve.setData(data)
+        i = (i+n) % bufferSize
+        line.setValue(i)
+    except:
+        print("could not convert to float") #catch if there is a failure to convert to float
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ START GETTING DATA FOREVER! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-while True:
-    try:   
-        ani = animation.FuncAnimation(fig, animate)
-        plt.show()
 
-    except KeyboardInterrupt:
-        break
+timer = pg.QtCore.QTimer()
+timer.timeout.connect(update)
+timer.start(10)
 
-ser.close()
+#ser.close()
