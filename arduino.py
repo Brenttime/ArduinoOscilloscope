@@ -91,7 +91,7 @@ def update():
         readData = sio.readline() #Print to the Regular console the readings
         print(ReadData)
 
-    n = 1  # update 10 samples per iteration
+    n = 1  # update 1 samples per iteration
 
     try:
         reading = float(sio.readline()) * 3.28 #The value my voltage divider works at (6.8k and 3.3k ohlm resisters)
