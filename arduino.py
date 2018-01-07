@@ -69,9 +69,9 @@ sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GET THE GRAPH SETUP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-try:
+try:    
     plt = pg.plot()
-    bufferSize = 1000
+    bufferSize = 10000
     data = np.zeros(bufferSize)
     curve = plt.plot()
     line = plt.addLine(x=0)
@@ -82,7 +82,7 @@ except:
 
 def update():
     global data, curve, line, i
-
+    
     whiteSpace = sio.readline() #capture the whitespace
     readData = sio.readline()
 
@@ -91,8 +91,8 @@ def update():
         readData = sio.readline() #Print to the Regular console the readings
         print(ReadData)
 
-    n = 1  # update 1 samples per iteration
-
+    n = 2  # update 2 samples per iteration
+    
     try:
         reading = float(sio.readline()) * 3.28 #The value my voltage divider works at (6.8k and 3.3k ohlm resisters)
         data[i:i+n] = reading
@@ -108,6 +108,6 @@ def update():
 
 timer = pg.QtCore.QTimer()
 timer.timeout.connect(update)
-timer.start(10)
+timer.start(0) #Give 0 Delay
 
 #ser.close()
