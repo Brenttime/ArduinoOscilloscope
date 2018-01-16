@@ -90,13 +90,13 @@ def update():
     
     #This allows to scale the View Up
     if keyboard.is_pressed('RIGHT'):
-        print("Right Pressed")
+        #print("Right Pressed")
         xMax = xMax + 10
         plt.setXRange(0, xMax)
 
     #This allows to scale the View Down
-    if keyboard.is_pressed('LEFT'):
-        print("Left Pressed")
+    if keyboard.is_pressed('LEFT') and xMax > 0:
+        #print("Left Pressed")
         xMax = xMax - 10
         plt.setXRange(0, xMax)
         
