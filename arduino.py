@@ -6,6 +6,17 @@ import io
 import time
 import numpy as np
 import pyqtgraph as pg
+import time
+import keyboard
+
+def key(event):
+    if event.char == event.keysym:
+        msg = 'Normal Key %r' % event.char
+    elif len(event.char) == 1:
+        msg = 'Punctuation Key %r (%r)' % (event.keysym, event.char)
+    else:
+        msg = 'Special Key %r' % event.keysym
+    label1.config(text=msg)
 
 #Gets all availabe serial Ports
 def serial_ports():
@@ -56,19 +67,11 @@ elif(len(portList) == 1):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ START SERIAL LINK WITH ARDUINO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #Gets all the data from the Serial Port at a Baud Rate of 115200    --- Difference between Baud Rate & Bit Rate http://www.electronicdesign.com/communications/what-s-difference-between-bit-rate-and-baud-rate
-ser = serial.Serial(selectedPort, 115200,timeout=0, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS)
-
-''' <Note>
-
-Do to the wonderful fact that serial.readline() was made to eliminate the '\r' or carriage return, I was forced to find a method to which
-I would be able to still implement it, and that is because it is required to read my serial port with EOL parameters; therefore, this
-line came into play.
-    </Note>
-'''
-sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
+ser = serial.Serial(selectedPort, 9600,timeout=1, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GET THE GRAPH SETUP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 try:    
     plt = pg.plot()
     bufferSize = 10000
@@ -77,37 +80,44 @@ try:
     line = plt.addLine(x=0)
     plt.setRange(xRange=[0, bufferSize], yRange=[-15, 15])
     i = 0
+    xMin = 0;
+    xMax = bufferSize;
 except:
     print("Graph Config Error")
 
 def update():
+    global plt, xMax, xMin
+    
+    #This allows to scale the View Up
+    if keyboard.is_pressed('RIGHT'):
+        print("Right Pressed")
+        xMax = xMax + 10
+        plt.setXRange(0, xMax)
+
+    #This allows to scale the View Down
+    if keyboard.is_pressed('LEFT'):
+        print("Left Pressed")
+        xMax = xMax - 10
+        plt.setXRange(0, xMax)
+        
     global data, curve, line, i
-    
-    whiteSpace = sio.readline() #capture the whitespace
-    readData = sio.readline()
 
-    #Check for all the white space
-    while(whiteSpace == data):
-        readData = sio.readline() #Print to the Regular console the readings
-        print(ReadData)
-
-    n = 2  # update 2 samples per iteration
+    n = 2  # update n samples per iteration
     
-    try:
-        reading = float(sio.readline()) * 3.28 #The value my voltage divider works at (6.8k and 3.3k ohlm resisters)
+    try:        
+        reading = float(ser.readline().strip()) * 3.06060606061 #The value my voltage divider works at (6.8k and 3.3k ohlm resisters)
         data[i:i+n] = reading
         curve.setData(data)
         i = (i+n) % bufferSize
         line.setValue(i)
     except:
-        print("could not convert to float") #catch if there is a failure to convert to float
+        error = "error" #tired of letting the console get filled with blank serial posts
+        #print("Could not convert to float") #catch if there is a failure to convert to float
+        #print("/" +sio.readLine() + "/") #debug
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ START GETTING DATA FOREVER! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
 timer = pg.QtCore.QTimer()
 timer.timeout.connect(update)
-timer.start(0) #Give 0 Delay
-
-#ser.close()
+timer.start() #Give 0 Delay
