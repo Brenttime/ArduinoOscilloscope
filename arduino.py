@@ -74,7 +74,8 @@ ser = serial.Serial(selectedPort, 9600,timeout=1, parity=serial.PARITY_NONE, sto
 
 try:    
     plt = pg.plot()
-    bufferSize = 10000
+    #bufferSize = 10000
+    bufferSize = 1000
     data = np.zeros(bufferSize)
     curve = plt.plot()
     line = plt.addLine(x=0)
