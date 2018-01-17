@@ -6,7 +6,6 @@ import io
 import time
 import numpy as np
 import pyqtgraph as pg
-import time
 import keyboard
 
 def key(event):
