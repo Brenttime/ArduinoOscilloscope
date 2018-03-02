@@ -1,7 +1,7 @@
 <h2>Arduino Oscilloscope Project </h2>
-Project to build an Oscilloscope using an Arduino
-  Guide & Video Coming soon
+The intention of this project was to build a desktop osciliscope using an Arduino UNO. After looking at many different projects regarding this idea, I was able to develop my own, but with a python UI. I started this project in order to get a good grasp on electerical engineering concepts, and also get a better understanding of programming in Python.
 
+<h2>Useful Key Shortcuts</h2>
 If you want to change scale in the GUI you need to use the right and left arrow keys:
 <ul>
   <li>Left Arrow Key - reduce scale</li>
